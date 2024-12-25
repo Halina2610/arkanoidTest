@@ -33,36 +33,56 @@ let destroyedBricks = []; // Для хранения разрушенных бл
 let ballLaunched = false; // Флаг для проверки состояния шарика
 
 function preload() {
-    this.load.image('paddle', '/src/assets/player.png');
-    this.load.image('ball', '/src/assets/birds.png');
-    this.load.image('brick', '/src/assets/klipartz.png');
-    this.load.image('background', '/src/assets/fon-dlia-urovnia.webp');
+    this.load.image('paddle', '/src/assets/images/elements/player.png');
+    this.load.image('ball', '/src/assets/images/balls/birds.png');
+    this.load.image('brick', '/src/assets/images/elements/klipartz.png');
+    this.load.image('background', '/src/assets/images/background/fon-dlia-urovnia.webp');
+    this.load.image('background_level2', '/src/assets/images/background/fon-dlia-igry-15.webp');
+    this.load.image('background_level3', '/src/assets/images/background/angry-birds-1-igra-4.webp');
+    this.load.image('ball_level2', '/src/assets/images/balls/birds(1).png');
+    this.load.image('ball_level3', '/src/assets/images/balls/birds(2).png');
 }
 
 function create() {
     // Установка фонового изображения
     this.add.image(400, 300, 'background').setOrigin(0.5).setDepth(-1);
 
-    paddle = this.physics.add.sprite(400, 550, 'paddle').setImmovable();
+    paddle = this.physics.add.sprite(400, 550, 'paddle').setImmovable().setDepth(1);
     paddle.body.collideWorldBounds = true;
 
-    ball = this.physics.add.sprite(400, 500, 'ball');
+    ball = this.physics.add.sprite(400, 522, 'ball');
     ball.setCollideWorldBounds(true);
-    ball.setBounce(1);
+    ball.setBounce(1).setDepth(1);
 
     bricks = this.physics.add.staticGroup();
     createBricks.call(this);
 
-    scoreText = this.add.text(16, 16, '', { fontSize: '20px', fill: '#fff' });
-    highScoreText = this.add.text(16, 40, '', { fontSize: '20px', fill: '#ff0' });
-    livesText = this.add.text(16, 64, '', { fontSize: '20px', fill: '#fff' });
-    levelText = this.add.text(16, 88, '', { fontSize: '20px', fill: '#fff' });
+    // Пример добавления фона для текста
+    const textPadding = 5; // Отступ для фона
+    const textWidth = 400; // Ширина фона (можно изменить)
+    const textHeight = 30; // Высота фона (можно изменить)
+
+    // Фон для счета
+    const scoreBackground = this.add.rectangle(16 + textPadding, config.height - 120 + textPadding, textWidth, textHeight, 0x000000, 0.2);
+    scoreText = this.add.text(16, config.height - 120, 'Score: 0', { fontSize: '20px', fontWeight: 'bold', fill: '#ffffff' }).setDepth(0);
+
+    // Фон для высокого счета
+    const highScoreBackground = this.add.rectangle(16 + textPadding, config.height - 90 + textPadding, textWidth, textHeight, 0x000000, 0.2);
+    highScoreText = this.add.text(16, config.height - 90, 'High Score: 0', { fontSize: '20px', fontWeight: 'bold', fill: '#962e9d' }).setDepth(0);
+    // Фон для жизней
+    const livesBackground = this.add.rectangle(16 + textPadding, config.height - 60 + textPadding, textWidth, textHeight, 0x000000, 0.2);
+    livesText = this.add.text(16, config.height - 60, 'Lives: 3', { fontSize: '20px', fontWeight: 'bold', fill: '#ffffff' }).setDepth(0);
+
+    // Фон для уровня
+    const levelBackground = this.add.rectangle(16 + textPadding, config.height - 30 + textPadding, textWidth, textHeight, 0x000000, 0.2);
+    levelText = this.add.text(16, config.height - 30, 'Level: 1', { fontSize: '20px', fontWeight: 'bold', fill: 'rgb(255,255,255)' }).setDepth(0);
 
     loadGameState.call(this);
 
-    gameOverText = this.add.text(400, 300, '', {
+    gameOverText = this.add.text(config.width / 2, config.height / 1.5, '', {
         fontSize: '40px',
-        fill: '#fff',
+        fontWeight: 'bold',
+        fill: '#ff002f',
     }).setOrigin(0.5);
     gameOverText.setVisible(false);
 
@@ -71,6 +91,8 @@ function create() {
             loseLife.call(this);
         }
     });
+
+
     ball.body.setCollideWorldBounds(true);
     ball.body.onWorldBounds = true;
 
@@ -160,99 +182,133 @@ function createBricks() {
 
 function resetBallAndPaddle() {
     ballLaunched = false; // Сбрасываем флаг запуска
-    ball.setPosition(paddle.x, 500); // Шарик на платформе
+    ball.setPosition(paddle.x, 522); // Шарик на платформе
     ball.setVelocity(0);
     paddle.setPosition(400, 550);
-}
-
-function nextLevel() {
-    level += 1;
-    levelText.setText('Level: ' + level);
-
-    lives = 3;
-    livesText.setText('Lives: ' + lives);
-
-    ball.setVelocity(ball.body.velocity.x * 1.2, ball.body.velocity.y * 1.2);
-    paddleSpeed += 50;
-
-    destroyedBricks = [];
-    bricks.clear(true, true);
-    createBricks.call(this);
-
-    resetBallAndPaddle.call(this);
-
-    if (level > 3) {
-        endGame.call(this, 'You Win! Press R to restart');
-    }
-
-    saveGameState();
 }
 
 function endGame(message) {
     gameOverText.setText(message);
     gameOverText.setVisible(true);
     this.physics.pause();
-    ball.setVelocity(0);
-    paddle.setVelocity(0);
-}
-
-function restartGame() {
-    localStorage.removeItem('arkanoidGameState');
-
-    score = 0;
-    lives = 3;
-    level = 1;
-    destroyedBricks = [];
-
-    scoreText.setText('Score: ' + score);
-    livesText.setText('Lives: ' + lives);
-    levelText.setText('Level: ' + level);
-    gameOverText.setVisible(false);
-    highScoreText.setText('High Score: ' + highScore);
-
-    bricks.clear(true, true);
-    createBricks.call(this);
-
-    resetBallAndPaddle.call(this);
-
-    this.physics.resume();
 }
 
 function saveGameState() {
     const gameState = {
         score: score,
-        lives: lives,
+        highScore: highScore,
         level: level,
-        destroyedBricks: destroyedBricks,
+        lives: lives,
     };
-    localStorage.setItem('arkanoidGameState', JSON.stringify(gameState));
+    localStorage.setItem('gameState', JSON.stringify(gameState));
 }
 
 function loadGameState() {
-    const savedState = localStorage.getItem('arkanoidGameState');
-    if (savedState) {
-        const gameState = JSON.parse(savedState);
-        score = gameState.score;
-        lives = gameState.lives;
-        level = gameState.level;
-        destroyedBricks = gameState.destroyedBricks || [];
+    const gameState = JSON.parse(localStorage.getItem('gameState'));
+    if (gameState) {
+        score = gameState.score || 0;
+        highScore = gameState.highScore || 0;
+        level = gameState.level || 1;
+        lives = gameState.lives || 3;
 
         scoreText.setText('Score: ' + score);
+        highScoreText.setText('High Score: ' + highScore);
         livesText.setText('Lives: ' + lives);
         levelText.setText('Level: ' + level);
-    }
-}
-
-function saveHighScore() {
-    localStorage.setItem('arkanoidHighScore', highScore);
-}
-
-function loadHighScore() {
-    const savedHighScore = localStorage.getItem('arkanoidHighScore');
-    if (savedHighScore) {
-        highScore = parseInt(savedHighScore, 10);
+    } else {
+        // Убедитесь, что значения инициализируются корректно при отсутствии данных
+        highScore = 0;
         highScoreText.setText('High Score: ' + highScore);
     }
 }
 
-loadHighScore();
+
+function saveHighScore() {
+    localStorage.setItem('highScore', highScore);
+}
+
+function restartGame() {
+    // Сброс игровых переменных
+    score = 0;
+    lives = 3;
+    level = 1;
+    paddleSpeed = 300; // Сброс скорости платформы
+    scoreText.setText('Score: 0');
+    highScoreText.setText('High Score: ' + highScore);
+    livesText.setText('Lives: 3');
+    levelText.setText('Level: 1');
+    gameOverText.setVisible(false);
+
+    // Сброс фона на начальный
+    this.add.image(400, 300, 'background').setOrigin(0.5).setDepth(-1);
+
+    // Сброс текстуры шарика на начальный
+    ball.setTexture('ball');
+
+    // Очистка разрушенных блоков и создание новых
+    destroyedBricks = [];
+    bricks.clear(true, true);
+    createBricks.call(this);
+
+    // Сброс платформы и шарика
+    resetBallAndPaddle.call(this);
+
+    // Возобновление физики
+    this.physics.resume();
+
+    // Сохранение состояния игры
+    saveGameState();
+}
+
+function nextLevel() {
+    // Эффект затемнения
+    const fadeOverlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 1).setDepth(10); // Чёрный слой поверх
+    fadeOverlay.alpha = 0; // Прозрачность слоя
+
+    this.tweens.add({
+        targets: fadeOverlay,
+        alpha: 1, // Полностью затемняет
+        duration: 1000, // Длительность эффекта
+        onComplete: () => {
+            // Переход на следующий уровень
+            level += 1;
+            if (level > 3) {
+                endGame.call(this, 'You Win! Press R to restart');
+                return;
+            }
+            setupNextLevel.call(this);
+
+            // Эффект восстановления экрана
+            this.tweens.add({
+                targets: fadeOverlay,
+                alpha: 0, // Снова прозрачный
+                duration: 1000, // Длительность восстановления
+                onComplete: () => fadeOverlay.destroy(), // Удалить слой после анимации
+            });
+        },
+    });
+}
+
+function setupNextLevel() {
+    levelText.setText('Level: ' + level);
+    lives = 3;
+    livesText.setText('Lives: ' + lives);
+
+    // Очистка и создание кирпичей
+    destroyedBricks = [];
+    bricks.clear(true, true);
+    createBricks.call(this);
+
+    resetBallAndPaddle.call(this);
+
+    // Изменение текстур в зависимости от уровня
+    if (level === 2) {
+        this.add.image(400, 300, 'background_level2').setOrigin(0.5).setDepth(-1);
+        ball.setTexture('ball_level2');
+    } else if (level === 3) {
+        this.add.image(400, 300, 'background_level3').setOrigin(0.5).setDepth(-1);
+        ball.setTexture('ball_level3');
+    }
+
+    saveGameState();
+}
