@@ -58,9 +58,9 @@ function create() {
     createBricks.call(this);
 
     // Пример добавления фона для текста
-    const textPadding = 5; // Отступ для фона
-    const textWidth = 400; // Ширина фона (можно изменить)
-    const textHeight = 30; // Высота фона (можно изменить)
+    const textPadding = 5;
+    const textWidth = 400;
+    const textHeight = 30;
 
     // Фон для счета
     const scoreBackground = this.add.rectangle(16 + textPadding, config.height - 120 + textPadding, textWidth, textHeight, 0x000000, 0.2);
