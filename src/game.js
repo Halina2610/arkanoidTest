@@ -33,14 +33,14 @@ let destroyedBricks = []; // Для хранения разрушенных бл
 let ballLaunched = false; // Флаг для проверки состояния шарика
 
 function preload() {
-    this.load.image('paddle', '/src/assets/images/elements/player.png');
-    this.load.image('ball', '/src/assets/images/balls/birds.png');
-    this.load.image('brick', '/src/assets/images/elements/klipartz.png');
-    this.load.image('background', '/src/assets/images/background/fon-dlia-urovnia.webp');
-    this.load.image('background_level2', '/src/assets/images/background/fon-dlia-igry-15.webp');
-    this.load.image('background_level3', '/src/assets/images/background/angry-birds-1-igra-4.webp');
-    this.load.image('ball_level2', '/src/assets/images/balls/birds(1).png');
-    this.load.image('ball_level3', '/src/assets/images/balls/birds(2).png');
+    this.load.image('paddle', '/assets/images/elements/player.png');
+    this.load.image('ball', '/assets/images/balls/birds.png');
+    this.load.image('brick', '/assets/images/elements/klipartz.png');
+    this.load.image('background', '/assets/images/background/fon-dlia-urovnia.webp');
+    this.load.image('background_level2', '/assets/images/background/fon-dlia-igry-15.webp');
+    this.load.image('background_level3', '/assets/images/background/angry-birds-1-igra-4.webp');
+    this.load.image('ball_level2', '/assets/images/balls/birds(1).png');
+    this.load.image('ball_level3', '/assets/images/balls/birds(2).png');
 }
 
 function create() {
