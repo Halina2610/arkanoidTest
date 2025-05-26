@@ -29,7 +29,7 @@ let level = 1; // Текущий уровень
 let levelText;
 let paddleSpeed = 300; // Начальная скорость платформы
 let gameOverText;
-let destroyedBricks = []; // Для хранения разрушенных блоков
+let persistentDestroyedBrickCoords = []; // Для хранения разрушенных блоков
 let ballLaunched = false; // Флаг для проверки состояния шарика
 
 function preload() {
@@ -136,7 +136,9 @@ function hitBrick(ball, brick) {
     brick.destroy();
     score += 10;
     scoreText.setText('Score: ' + score);
-    destroyedBricks = destroyedBricks.filter((b) => b !== brickIndex);
+    if (!persistentDestroyedBrickCoords.includes(brickIndex)) {
+        persistentDestroyedBrickCoords.push(brickIndex);
+    }
 
     if (score > highScore) {
         highScore = score;
@@ -169,13 +171,11 @@ function createBricks() {
 
     for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
-            const brick = bricks.create(80 + x * 70, 50 + y * 35, 'brick');
-            if (destroyedBricks.includes(`${x},${y}`)) {
-                brick.setVisible(false);
-                brick.disableBody(true, true);
-            } else {
-                destroyedBricks.push(`${x},${y}`);
+            const brickCoord = `${x},${y}`;
+            if (persistentDestroyedBrickCoords.includes(brickCoord)) {
+                continue; // Skip creating this brick as it was previously destroyed
             }
+            bricks.create(80 + x * 70, 50 + y * 35, 'brick');
         }
     }
 }
@@ -199,6 +199,7 @@ function saveGameState() {
         highScore: highScore,
         level: level,
         lives: lives,
+        savedDestroyedBricks: persistentDestroyedBrickCoords,
     };
     localStorage.setItem('gameState', JSON.stringify(gameState));
 }
@@ -210,6 +211,7 @@ function loadGameState() {
         highScore = gameState.highScore || 0;
         level = gameState.level || 1;
         lives = gameState.lives || 3;
+        persistentDestroyedBrickCoords = gameState.savedDestroyedBricks || [];
 
         scoreText.setText('Score: ' + score);
         highScoreText.setText('High Score: ' + highScore);
@@ -246,7 +248,7 @@ function restartGame() {
     ball.setTexture('ball');
 
     // Очистка разрушенных блоков и создание новых
-    destroyedBricks = [];
+    persistentDestroyedBrickCoords = [];
     bricks.clear(true, true);
     createBricks.call(this);
 
@@ -295,7 +297,7 @@ function setupNextLevel() {
     livesText.setText('Lives: ' + lives);
 
     // Очистка и создание кирпичей
-    destroyedBricks = [];
+    persistentDestroyedBrickCoords = [];
     bricks.clear(true, true);
     createBricks.call(this);
 
